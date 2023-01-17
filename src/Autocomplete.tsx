@@ -5,16 +5,19 @@ import {
   TextField
 } from "@mui/material";
 import { SyntheticEvent, useState } from "react";
-import { flow } from "lodash";
+import { flow, isEmpty } from "lodash";
 
-const maybe = (val: any) => (val === undefined ? null : val);
+const maybe = (val?: Users, multiple: boolean = false) =>
+  (isEmpty(val) ? (multiple ? [] : null) : val);
 
 type User = {
   name: string;
 };
 
+type Users = User | User[];
+
 interface MinimalProps {
-  value?: User;
+  value?: Users;
   defaultChecked?: boolean;
   multiple?: boolean;
   onChange?: (user: User | null) => void;
@@ -24,15 +27,15 @@ const mike: User = { name: "Mike" };
 const fakeOptions: User[] = [mike, { name: "Niko" }, { name: "Jamjam" }];
 
 export const Minimal = (props: MinimalProps) => {
-  const [value, setValue] = useState<User | null>(maybe(props.value));
-  // const [inputValue, setInputValue] = useState("");
+
+  const [value, setValue] = useState<Users | null>(maybe(props.value, props.multiple));
   const [checked, setChecked] = useState<boolean>(
     Boolean(props.defaultChecked)
   );
 
   const onChangeHandlerAutocomplete = (
     _: SyntheticEvent,
-    user: User | null
+    user: Users | null
   ) => {
     console.log("State: ", user);
     setValue(user);
@@ -46,15 +49,11 @@ export const Minimal = (props: MinimalProps) => {
 
   const onChangeHandlerCheckbox = (_: SyntheticEvent, checked: boolean) => {
     if (checked) onChangeAutocomplete(_, mike);
-    else onChangeAutocomplete(_, maybe(props.value));
+    else onChangeAutocomplete(_, maybe(props.value, props.multiple));
     setChecked(checked);
   };
 
   const onChangeCheckbox = onChangeHandlerCheckbox;
-
-  // useEffect(() => {
-  //   onChangeAutocomplete(undefined, value);
-  // }, [value]);
 
   return (
     <>
@@ -66,10 +65,6 @@ export const Minimal = (props: MinimalProps) => {
         multiple={props.multiple === true}
         onChange={onChangeAutocomplete}
         value={value}
-        // inputValue={inputValue}
-        // onInputChange={(_, newInputValue) => {
-        //   setInputValue(newInputValue);
-        // }}
         getOptionLabel={(option) => option.name}
         renderInput={(params) => <TextField {...params} label="Movie" />}
       />
@@ -87,7 +82,6 @@ export const Minimal = (props: MinimalProps) => {
       <div>{`value: ${
         value !== null ? `'${JSON.stringify(value)}'` : "null"
       }`}</div>
-      {/* <div>{`inputValue: '${inputValue}'`}</div> */}
     </>
   );
 };
